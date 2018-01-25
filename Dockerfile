@@ -1,12 +1,11 @@
 #FROM pytorch/pytorch
-#FROM tensorflow/tensorflow:nightly-gpu-py3
-FROM nvidia/cuda:8.0-devel-ubuntu16.04
+FROM tensorflow/tensorflow:nightly-gpu-py3
+#FROM nvidia/cuda:8.0-devel-ubuntu16.04
 
 RUN apt-get update && apt-get install -y \
         build-essential \
         cmake \
         git \
-        graphviz \
         htop \
         libcupti-dev \
         python3-dev \
@@ -16,14 +15,14 @@ RUN apt-get update && apt-get install -y \
         tree \
         unzip \
         vim \
-        wget \
-        xdg-utils
+        wget
 
 RUN pip3 install --upgrade pip
 RUN pip3 install \
-        graphviz \
+        future \
         ipython \
         matplotlib \
+        nltk \
         nose \
         numpy \
         pandas \
@@ -40,17 +39,20 @@ RUN pip3 install torchvision
 # install TensorFlow
 #RUN pip3 install tensorflow-gpu
 
-# install Keras
-RUN pip3 install keras
-
 # install Scikit-learn
 RUN pip3 install scikit-learn
 
+# install Theano
+RUN pip3 install theano
+
+# install Keras
+RUN pip3 install keras
+
 # install XGBoost
-RUN git clone --recursive https://github.com/dmlc/xgboost && \
-    mkdir xgboost/build && cd xgboost/build && \
-    cmake .. -DUSE_CUDA=ON && make -j && \
-    cd ../python-package && python3 setup.py install
+#RUN git clone --recursive https://github.com/dmlc/xgboost && \
+#    mkdir xgboost/build && cd xgboost/build && \
+#    cmake .. -DUSE_CUDA=ON && make -j && \
+#    cd ../python-package && python3 setup.py install
 
 # configure juypter notebook
 #RUN pip3 install jupyter
