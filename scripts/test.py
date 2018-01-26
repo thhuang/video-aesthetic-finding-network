@@ -1,12 +1,11 @@
 import numpy as np
 
-from keras.models import Sequential
-from keras.layers import LSTM, Dense, Dropout, Activation
-from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint
-from keras.utils import np_utils
+from tensorflow.contrib.keras import models
+from tensorflow.contrib.keras import layers
+from tensorflow.contrib.keras import optimizers
+from tensorflow.contrib.keras import callbacks
+from tensorflow.contrib.keras import utils
 from datetime import datetime
-
 
 ######################
 ## Data Preparation ##
@@ -50,7 +49,7 @@ X = np.reshape(data_input, (num_samples, num_time_steps, num_features))
 # Normalize
 X = X / num_vocab
 # One-hot encoding
-Y = np_utils.to_categorical(data_target)
+Y = utils.to_categorical(data_target)
 print(X.shape)
 print(Y.shape)
 
@@ -65,22 +64,22 @@ epochs = 800
 batch_size = 100
 
 # Define model
-model = Sequential()
-model.add(LSTM(512, input_shape=(X.shape[1], X.shape[2]), activation='tanh', return_sequences=True))
-model.add(Dropout(0.2))
-model.add(LSTM(512, activation='tanh'))
-model.add(Dropout(0.2))
-model.add(Dense(Y.shape[1], activation='softmax'))
+model = models.Sequential()
+model.add(layers.LSTM(512, input_shape=(X.shape[1], X.shape[2]), activation='tanh', return_sequences=True))
+model.add(layers.Dropout(0.2))
+model.add(layers.LSTM(512, activation='tanh'))
+model.add(layers.Dropout(0.2))
+model.add(layers.Dense(Y.shape[1], activation='softmax'))
 model.summary()
 
 # Define optimizer
-adam = Adam(learning_rate)
+adam = optimizers.Adam(learning_rate)
 model.compile(optimizer=adam, loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Set check point
 filepath = '../data/output/practice/weights/weights-improvement={epoch:02d}-{loss:4f}.hdf5'
-checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
+checkpoint = callbacks.ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
 
@@ -91,7 +90,7 @@ callbacks_list = [checkpoint]
 print('Training started:')
 start_time = datetime.now()
 model.fit(X, Y,
-          nb_epoch=epochs, batch_size=batch_size,
+          epochs=epochs, batch_size=batch_size,
           shuffle=True, callbacks=callbacks_list,
           verbose=1)
 end_time = datetime.now()
