@@ -60,24 +60,20 @@ if __name__ == '__main__':
 
     video_names = os.listdir(videos_dir)
     num_videos = len(video_names)
-    count = 1
+    video_count = 1
     for video_name in video_names:
         t0, _ = time_counters()
-        print('{:0>2}/{:0>2} Evaluating {}'.format(count, num_videos, video_name))
-        count += 1
+        print('{:0>2}/{:0>2} Evaluating {}'.format(video_count, num_videos, video_name))
+        video_count += 1
         video_dir = os.path.join(videos_dir, video_name)
         metadata = skvideo.io.ffprobe(video_dir)
         video_gen = skvideo.io.vreader(video_dir)
         features = list()
-        count = 1
-
         for frame in tqdm(video_gen, total=int(metadata['video']['@nb_frames']), unit='frames'):
-            #print('Evaluating frame {:0>7}'.format(count))
             img = frame.astype(np.float32) / 255
             img_resize = skimage.transform.resize(img, (227, 227), mode='reflect') - 0.5
             img_resize = np.expand_dims(img_resize, axis=0)
             features.append(sess.run([score_func], feed_dict={image_placeholder: img_resize}))
-            count += 1
         features = np.squeeze(np.concatenate(features, axis=1))
         # write feature file
         if not os.path.exists(report_dir):
