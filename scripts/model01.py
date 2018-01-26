@@ -24,17 +24,22 @@ data_target[30:-30] = 1
 #rescale integers from 0-1 since LSTM uses sigmoid to squash the activation values in [0,1]
 #convert the output patterns into a one hot encoding
 
-num_samples = len(data_input)
-num_time_steps = 10
+print(data_input.shape)
+
+num_samples = 1
+num_time_steps = 466
 num_features = 1000  # deep features from VFN
 
 
 # Reshape X to be [samples, time steps, features]
 X = np.reshape(data_input, (num_samples, num_time_steps, num_features))
 # Normalize
-X = X / 300  # TODO: find better methods
+X = X / np.max(X)  # TODO: find better methods
 # One-hot encoding
 Y = utils.to_categorical(data_target)
+num_categories = Y.shape[1]
+Y = np.reshape(Y, (num_samples, num_time_steps, num_categories))
+
 print(X.shape)
 print(Y.shape)
 
@@ -45,16 +50,16 @@ print(Y.shape)
 
 # Define hyper-parameters
 learning_rate = 1e-3
-epochs = 800
-batch_size = 2
+epochs = 10
+batch_size = 1
 
 # Define model
 model = models.Sequential()
-model.add(layers.LSTM(512, input_shape=(X.shape[1], X.shape[2]), activation='tanh', return_sequences=True))
+model.add(layers.LSTM(2000, input_shape=(X.shape[1], X.shape[2]), activation='tanh', return_sequences=True))
 model.add(layers.Dropout(0.2))
-model.add(layers.LSTM(512, activation='tanh'))
+model.add(layers.LSTM(2000, activation='tanh', return_sequences=True))
 model.add(layers.Dropout(0.2))
-model.add(layers.Dense(Y.shape[1], activation='softmax'))
+model.add(layers.Dense(Y.shape[2], activation='softmax'))
 model.summary()
 
 # Define optimizer
@@ -63,7 +68,7 @@ model.compile(optimizer=adam, loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Set check point
-filepath = '../data/output/practice/weights/weights-improvement={epoch:02d}-{loss:4f}.hdf5'
+filepath = '../data/output/test/weights/weights-improvement={epoch:02d}-{loss:4f}.hdf5'
 checkpoint = callbacks.ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
