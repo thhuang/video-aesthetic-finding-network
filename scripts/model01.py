@@ -1,16 +1,18 @@
 import numpy as np
 
-from keras.models import Sequential
-from keras.layers import ConvLSTM2D, LSTM, Dense, Dropout
-from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint
-from keras.utils import np_utils
+from tensorflow.contrib.keras import models
+from tensorflow.contrib.keras import layers
+from tensorflow.contrib.keras import optimizers
+from tensorflow.contrib.keras import callbacks
+from tensorflow.contrib.keras import utils
 from datetime import datetime
 
 
 ######################
 ## Data Preparation ##
 ######################
+
+X = np.load('')
 
 
 #####################

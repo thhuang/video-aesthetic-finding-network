@@ -47,9 +47,7 @@ if __name__ == '__main__':
     print('---load pre-trained model---')
     saver = tf.train.Saver(tf.global_variables())
     sess = tf.Session(config=tf.ConfigProto(device_count = {'GPU': 0}))
-    print('sess.run(tf.global_variables_initializer())')
     sess.run(tf.global_variables_initializer())
-    print('done')
     saver.restore(sess, snapshot)
     t0, _ = time_counters(t0, '>>> load pre-trained model', print_time=True)
 

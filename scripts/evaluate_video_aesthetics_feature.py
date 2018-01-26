@@ -50,7 +50,6 @@ if __name__ == '__main__':
     sess.run(tf.global_variables_initializer())
     saver.restore(sess, snapshot)
     t0, _ = time_counters(t0, '>>> load pre-trained model', print_time=True)
-    print()
 
     # Evaluate aesthetics
     print('---evaluate aesthetics score---')
@@ -75,7 +74,7 @@ if __name__ == '__main__':
         os.makedirs(report_dir)
     report_fullpath = os.path.join(report_dir, 'score')
     np.save(report_fullpath, scores)
-    print('scores is written to {}.npy'.format(report_fullpath))
+    print('scores is written to {}'.format(report_fullpath))
     t0, _ = time_counters(t0, '>>> write score file', print_time=True)
 
 
