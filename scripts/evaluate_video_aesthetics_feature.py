@@ -81,7 +81,6 @@ if __name__ == '__main__':
         report_fullpath = os.path.join(report_dir, video_name)
         np.save(report_fullpath, features)
         print('({} X {}) features are written to {}'.format(features.shape[0], features.shape[1], report_fullpath))
-
     end_time = datetime.now()
     print('Training complete!')
     print('Time taken: {}'.format(end_time - start_time))

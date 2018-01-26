@@ -8,6 +8,7 @@ import skimage.transform
 import vfn.network as nw
 from vfn.vfn_eval import str2bool
 from utils.time_counters import time_counters
+from tqdm import tqdm
 
 
 if __name__ == '__main__':
@@ -44,33 +45,29 @@ if __name__ == '__main__':
 
     # load pre-trained model
     t0, _ = time_counters()
-    print('---load pre-trained model---')
+    print('---Load Pre-trained Model---')
     saver = tf.train.Saver(tf.global_variables())
-    sess = tf.Session(config=tf.ConfigProto(device_count = {'GPU': 0}))
+    sess = tf.Session(config=tf.ConfigProto())
     sess.run(tf.global_variables_initializer())
     saver.restore(sess, snapshot)
-    t0, _ = time_counters(t0, '>>> load pre-trained model', print_time=True)
+    t0, _ = time_counters(t0, '>>> Load pre-trained model', print_time=True)
 
     # evaluate aesthetics
-    print('---load images---')
+    print('---Extract Aesthetics Features---')
     scores = list()
     index = np.array([])
     image_names = os.listdir(images_dir)
-    for image_name in image_names:
-        print('Evaluating {}'.format(image_name))
+    for image_name in tqdm(image_names, total=len(image_names), unit='images'):
         image_dir = os.path.join(images_dir, image_name)
-        print('Loading {}'.format(image_dir))
         img = skimage.io.imread(image_dir)
         img = img.astype(np.float32) / 255
-        img_resize = skimage.transform.resize(img, (227, 227)) - 0.5
+        img_resize = skimage.transform.resize(img, (227, 227), mode='reflect') - 0.5
         if not len(img_resize.shape) == 3:
             continue
         img_resize = np.expand_dims(img_resize, axis=0)
         index = np.append(index, image_name)
         scores.append(sess.run([score_func], feed_dict={image_placeholder: img_resize}))
-        #print(image_name, scores[-1])
     scores = np.squeeze(np.concatenate(scores, axis=1))
-    print(scores.shape)
     t0, _ = time_counters(t0, '>>> evaluate aesthetics', print_time=True)
 
     # write score file
