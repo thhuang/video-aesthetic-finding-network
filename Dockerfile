@@ -40,8 +40,8 @@ RUN pip3 install \
 RUN pip3 install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp35-cp35m-linux_x86_64.whl
 RUN pip3 install torchvision
 
-# install TensorFlow
-#RUN pip3 install tensorflow-gpu
+# install TensorFlow (cpu version)
+RUN pip3 install tensorflow
 
 # install Scikit-learn
 RUN pip3 install scikit-learn
