@@ -34,6 +34,7 @@ RUN pip3 install \
         sk-video \
         sortedcontainers \
         tornado \
+        tqdm \
         wheel
 
 # install PyTorch

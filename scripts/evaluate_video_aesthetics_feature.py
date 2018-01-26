@@ -9,6 +9,8 @@ import skvideo.io
 import vfn.network as nw
 from vfn.vfn_eval import str2bool
 from utils.time_counters import time_counters
+from tqdm import tqdm
+from datetime import datetime
 
 
 if __name__ == '__main__':
@@ -44,45 +46,46 @@ if __name__ == '__main__':
 
     # Load pre-trained model
     t0, _ = time_counters()
-    print('---load pre-trained model---')
+    print('---Load Pre-trained Model---')
     saver = tf.train.Saver(tf.global_variables())
     sess = tf.Session(config=tf.ConfigProto())
     sess.run(tf.global_variables_initializer())
     saver.restore(sess, snapshot)
-    t0, _ = time_counters(t0, '>>> load pre-trained model', print_time=True)
+    time_counters(t0, '>>> Load pre-trained model', print_time=True)
+    print()
 
     # Evaluate aesthetics
-    print('---evaluate aesthetics score---')
-    print('Snapshot: {}'.format(snapshot))
+    print('---Extract Aesthetics Features---')
+    start_time = datetime.now()
 
     video_names = os.listdir(videos_dir)
     for video_name in video_names:
+        t0, _ = time_counters()
         print('Evaluating {}'.format(video_name))
         video_dir = os.path.join(videos_dir, video_name)
-        print('Loading {}'.format(video_dir))
-        videogen = skvideo.io.vreader(video_dir)
+        metadata = skvideo.io.ffprobe(video_dir)
+        video_gen = skvideo.io.vreader(video_dir)
         features = list()
         count = 1
-        for frame in videogen:
-            print('Evaluating frame {:0>7}'.format(count))
+
+        for frame in tqdm(video_gen, total=int(metadata['video']['@nb_frames']), unit='frames'):
+            #print('Evaluating frame {:0>7}'.format(count))
             img = frame.astype(np.float32) / 255
-            img_resize = skimage.transform.resize(img, (227, 227)) - 0.5
+            img_resize = skimage.transform.resize(img, (227, 227), mode='reflect') - 0.5
             img_resize = np.expand_dims(img_resize, axis=0)
             features.append(sess.run([score_func], feed_dict={image_placeholder: img_resize}))
             count += 1
         features = np.squeeze(np.concatenate(features, axis=1))
-        print(features.shape)
-        # write score file
-        print('---write score file---')
+        # write feature file
         if not os.path.exists(report_dir):
             os.makedirs(report_dir)
         report_fullpath = os.path.join(report_dir, video_name)
         np.save(report_fullpath, features)
-        print('features are written to {}'.format(report_fullpath))
-        t0, _ = time_counters(t0, '>>> write score file', print_time=True)
+        print('({}X{}) features are written to {}'.format(features.shape[0], features.shape[1], report_fullpath))
 
-
-    t0, _ = time_counters(t0, '>>> evaluate aesthetics', print_time=True)
+    end_time = datetime.now()
+    print('Training complete!')
+    print('Time taken: {}'.format(end_time - start_time))
 
 
 
