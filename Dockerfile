@@ -1,17 +1,19 @@
 #FROM pytorch/pytorch
 FROM tensorflow/tensorflow:nightly-gpu-py3
+#FROM tensorflow/tensorflow:latest
 #FROM nvidia/cuda:8.0-devel-ubuntu16.04
 
 RUN apt-get update && apt-get install -y \
         build-essential \
         cmake \
+        ffmpeg \
         git \
         htop \
         libcupti-dev \
         python3-dev \
         python3-pip \
-        python3-tk \
         python3-setuptools \
+        python3-tk \
         tree \
         unzip \
         vim \

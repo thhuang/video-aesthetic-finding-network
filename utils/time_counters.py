@@ -6,5 +6,5 @@ def time_counters(start_time=None, task_name='', print_time=False):
     else:
         dt = datetime.now() - start_time
         if print_time:
-            print(task_name + ':', dt)
+            print('{}: {}'.format(task_name, dt))
         return datetime.now(), dt
