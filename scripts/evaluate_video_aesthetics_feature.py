@@ -59,9 +59,12 @@ if __name__ == '__main__':
     start_time = datetime.now()
 
     video_names = os.listdir(videos_dir)
+    num_videos = len(video_names)
+    count = 1
     for video_name in video_names:
         t0, _ = time_counters()
-        print('Evaluating {}'.format(video_name))
+        print('{:0>2}/{:0>2} Evaluating {}'.format(count, num_videos, video_name))
+        count += 1
         video_dir = os.path.join(videos_dir, video_name)
         metadata = skvideo.io.ffprobe(video_dir)
         video_gen = skvideo.io.vreader(video_dir)
@@ -81,7 +84,7 @@ if __name__ == '__main__':
             os.makedirs(report_dir)
         report_fullpath = os.path.join(report_dir, video_name)
         np.save(report_fullpath, features)
-        print('({}X{}) features are written to {}'.format(features.shape[0], features.shape[1], report_fullpath))
+        print('({} X {}) features are written to {}'.format(features.shape[0], features.shape[1], report_fullpath))
 
     end_time = datetime.now()
     print('Training complete!')
