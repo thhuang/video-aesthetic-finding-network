@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--input', help='Path to the file with images for aesthetics score evaluation', type=str, default='/app/data/input/images')
     parser.add_argument('--input_video', help='Path to the video for aesthetics score evaluation', type=str, default='/app/data/input/videos/test.mp4')
     parser.add_argument('--report_path', help='Path to score report', type=str, default='/app/data/output/videos')
-    parser.add_argument('--cpu_only', help='Use CPU only', type=str, default='True')
+    parser.add_argument('--cpu_only', help='Use CPU only', type=str, default='False')
 
     args = parser.parse_args()
 
@@ -50,6 +50,8 @@ if __name__ == '__main__':
     saver = tf.train.Saver(tf.global_variables())
     if cpu_only:
         config = tf.ConfigProto(device_count={'GPU': 0})
+    else:
+        config = tf.ConfigProto()
     sess = tf.Session(config=config)
     sess.run(tf.global_variables_initializer())
     saver.restore(sess, snapshot)
