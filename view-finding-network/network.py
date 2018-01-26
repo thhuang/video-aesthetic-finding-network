@@ -41,7 +41,7 @@ def loss(feature_vec, loss_matrix, ranking_loss_type):
     elif ranking_loss_type == 'ranknet':
         return ranknet_loss(feature_vec, loss_matrix)
     else:
-        print "Error: ranking loss >> {} << is unknown".format(ranking_loss_type)
+        print('Error: ranking loss >> {} << is unknown'.format(ranking_loss_type))
 
 def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group=1):
     '''From https://github.com/ethereon/caffe-tensorflow

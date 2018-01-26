@@ -79,11 +79,11 @@ def evaluate_FCDB():
         cnt += 1
         crop_cnt += len(crops)
 
-    print 'Average overlap ratio: {:.4f}'.format(accum_overlap_ratio / cnt)
-    print 'Average boundary displacement: {:.4f}'.format(accum_boundary_displacement / (cnt * 4.0))
-    print 'Alpha recall: {:.4f}'.format(100 * float(alpha_cnt) / cnt)
-    print 'Total image evaluated:', cnt
-    print 'Average crops per image:', float(crop_cnt) / cnt
+    print('Average overlap ratio: {:.4f}'.format(accum_overlap_ratio / cnt))
+    print('Average boundary displacement: {:.4f}'.format(accum_boundary_displacement / (cnt * 4.0)))
+    print('Alpha recall: {:.4f}'.format(100 * float(alpha_cnt) / cnt))
+    print('Total image evaluated:', cnt)
+    print('Average crops per image:', float(crop_cnt) / cnt)
 
 
 def evaluate_aesthetics_score(sess, score_func, image_placeholder, images):
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     sess.run(tf.global_variables_initializer())
     saver.restore(sess, snapshot)
 
-    print "Snapshot: {}".format(snapshot)
+    print('Snapshot: {}'.format(snapshot))
     start_time = time.time()
     evaluate_FCDB()
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print('--- %s seconds ---' % (time.time() - start_time))

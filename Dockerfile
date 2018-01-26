@@ -27,7 +27,9 @@ RUN pip3 install \
         numpy \
         pandas \
         requests \
+        scikit-image \
         scipy \
+        sk-video \
         sortedcontainers \
         tornado \
         wheel
