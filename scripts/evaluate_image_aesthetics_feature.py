@@ -53,7 +53,7 @@ if __name__ == '__main__':
     t0, _ = time_counters(t0, '>>> Load pre-trained model', print_time=True)
 
     # evaluate aesthetics
-    print('---Extract Aesthetics Features---')
+    print('---Extract Aesthetic Features---')
     scores = list()
     index = np.array([])
     image_names = os.listdir(images_dir)
@@ -71,10 +71,10 @@ if __name__ == '__main__':
     t0, _ = time_counters(t0, '>>> evaluate aesthetics', print_time=True)
 
     # write score file
-    print('---write score file---')
+    print('---Write Score File---')
     if not os.path.exists(report_dir):
         os.makedirs(report_dir)
     report_fullpath = os.path.join(report_dir, 'score')
     np.save(report_fullpath, scores)
-    print('scores is written to {}'.format(report_fullpath))
+    print('scores are written to {}'.format(report_fullpath))
     t0, _ = time_counters(t0, '>>> write score file', print_time=True)

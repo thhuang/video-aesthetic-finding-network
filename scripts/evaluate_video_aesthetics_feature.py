@@ -55,7 +55,7 @@ if __name__ == '__main__':
     print()
 
     # Evaluate aesthetics
-    print('---Extract Aesthetics Features---')
+    print('---Extract Aesthetic Features---')
     start_time = datetime.now()
 
     video_names = os.listdir(videos_dir)
