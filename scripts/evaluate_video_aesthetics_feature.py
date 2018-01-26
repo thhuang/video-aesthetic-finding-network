@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('--spp', help='Whether to use spatial pyramid pooling in the last layer or not', type=str, default='True')
     parser.add_argument('--pooling', help='Which pooling function to use', type=str, choices=['max', 'avg'], default='max')
     parser.add_argument('--input', help='Path to the file with images for aesthetics score evaluation', type=str, default='/app/data/input/images')
-    parser.add_argument('--input_video', help='Path to the video for aesthetics score evaluation', type=str, default='/app/data/input/videos/test.mp4')
+    parser.add_argument('--input_videos', help='Path to the file with videos for aesthetics score evaluation', type=str, default='/app/data/input/videos')
     parser.add_argument('--report_path', help='Path to score report', type=str, default='/app/data/output/videos')
 
     args = parser.parse_args()
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     SPP = str2bool(args.spp)
     pooling = args.pooling
     images_dir = args.input
-    video_dir = args.input_video
+    videos_dir = args.input_videos
     report_dir = args.report_path
 
     with tf.variable_scope("ranker") as scope:
@@ -54,27 +54,36 @@ if __name__ == '__main__':
     # Evaluate aesthetics
     print('---evaluate aesthetics score---')
     print('Snapshot: {}'.format(snapshot))
-    videogen = skvideo.io.vreader(video_dir)
-    scores = list()
-    count = 1
-    for frame in videogen:
-        print('Evaluating frame {:0>7}'.format(count))
-        img = frame.astype(np.float32) / 255
-        img_resize = skimage.transform.resize(img, (227, 227)) - 0.5
-        img_resize = np.expand_dims(img_resize, axis=0)
-        scores.append(sess.run([score_func], feed_dict={image_placeholder: img_resize}))
-        count += 1
-    scores = np.squeeze(np.concatenate(scores, axis=1))
-    print(scores.shape)
+
+    video_names = os.listdir(videos_dir)
+    for video_name in video_names:
+        print('Evaluating {}'.format(video_name))
+        video_dir = os.path.join(videos_dir, video_name)
+        print('Loading {}'.format(video_dir))
+        videogen = skvideo.io.vreader(video_dir)
+        features = list()
+        count = 1
+        for frame in videogen:
+            print('Evaluating frame {:0>7}'.format(count))
+            img = frame.astype(np.float32) / 255
+            img_resize = skimage.transform.resize(img, (227, 227)) - 0.5
+            img_resize = np.expand_dims(img_resize, axis=0)
+            features.append(sess.run([score_func], feed_dict={image_placeholder: img_resize}))
+            count += 1
+        features = np.squeeze(np.concatenate(features, axis=1))
+        print(features.shape)
+        # write score file
+        print('---write score file---')
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+        report_fullpath = os.path.join(report_dir, video_name)
+        np.save(report_fullpath, features)
+        print('features are written to {}'.format(report_fullpath))
+        t0, _ = time_counters(t0, '>>> write score file', print_time=True)
+
+
     t0, _ = time_counters(t0, '>>> evaluate aesthetics', print_time=True)
 
-    # write score file
-    print('---write score file---')
-    if not os.path.exists(report_dir):
-        os.makedirs(report_dir)
-    report_fullpath = os.path.join(report_dir, 'score')
-    np.save(report_fullpath, scores)
-    print('scores is written to {}'.format(report_fullpath))
-    t0, _ = time_counters(t0, '>>> write score file', print_time=True)
+
 
 
