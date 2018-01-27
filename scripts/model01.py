@@ -43,15 +43,13 @@ for video_name in video_names:
     data_target.append(video_target)
 
 
-
-
 #####################
 ## Data Preprocess ##
 #####################
 
-#Input sequence for LSTM network : [samples, time steps, features]
-#rescale integers from 0-1 since LSTM uses sigmoid to squash the activation values in [0,1]
-#convert the output patterns into a one hot encoding
+# Input sequence for LSTM network : [samples, time steps, features]
+# rescale integers from 0 to 1 since LSTM uses sigmoid to squash the activation values in [0,1]
+# convert the output patterns into a one hot encoding
 
 X  = preprocessing.sequence.pad_sequences(data_input, padding='post')
 X  = [np.expand_dims(e, axis=0) for e in X]
@@ -67,7 +65,6 @@ print(Y.shape)
 
 num_samples, num_time_steps, num_features = X.shape
 num_categories = Y.shape[2]
-
 
 
 ####################
