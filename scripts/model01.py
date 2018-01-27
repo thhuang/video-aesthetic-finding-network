@@ -76,7 +76,7 @@ num_categories = Y.shape[2]
 
 # Define hyper-parameters
 learning_rate = 1e-4
-epochs = 5
+epochs = 10
 batch_size = 2
 
 # Define model
