@@ -47,8 +47,7 @@ for video_name in video_names:
 ## Data Preprocess ##
 #####################
 
-# Input sequence for LSTM network : [samples, time steps, features]
-# rescale integers from 0 to 1 since LSTM uses sigmoid to squash the activation values in [0,1]
+# Input sequence for RNN-based network : [samples, time steps, features]
 # convert the output patterns into a one hot encoding
 
 X  = preprocessing.sequence.pad_sequences(data_input, padding='post')
@@ -78,9 +77,9 @@ batch_size = 2
 
 # Define model
 model = models.Sequential()
-model.add(layers.LSTM(2000, input_shape=(num_time_steps, num_features), activation='tanh', return_sequences=True))
+model.add(layers.Bidirectional(layers.GRU(200, activation='tanh', return_sequences=True), input_shape=(num_time_steps, num_features)))
 model.add(layers.Dropout(0.2))
-model.add(layers.LSTM(2000, activation='tanh', return_sequences=True))
+model.add(layers.Bidirectional(layers.GRU(200, activation='tanh', return_sequences=True)))
 model.add(layers.Dropout(0.2))
 model.add(layers.Dense(Y.shape[2], activation='softmax'))
 model.summary()
@@ -88,7 +87,7 @@ model.summary()
 # Define optimizer
 adam = optimizers.Adam(learning_rate)
 model.compile(optimizer=adam, loss='categorical_crossentropy',
-              metrics=['accuracy'])
+              metrics=['acc'])
 
 # Set check point
 filepath = '../data/output/videos/tainan/weights/weights-improvement={epoch:02d}-{loss:4f}.hdf5'
