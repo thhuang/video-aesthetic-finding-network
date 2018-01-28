@@ -60,9 +60,21 @@ result = model.predict_proba(X)[0][:, 1]
 result_threshold = result > 0.3  # TODO: threshold
 end_time = datetime.now()
 print(result)
+if result_threshold[0] == 1:
+    print('clip: {:.2f}'.format(0), end=', ')
+    state = True
+else:
+    state = False
 for i in range(len(result) - 1):
     if not result_threshold[i] == result_threshold[i + 1]:
-        print('cut:', i / 30, 'sec')
+        if not state:
+            print('clip: {:.2f}'.format(i / 30), end=', ')
+            state = True
+        else:
+            print('{:.2f}'.format(i / 30))
+            state = False
+if state:
+    print('end')
 print('Evaluation complete!')
 print('Time taken: {}'.format(end_time - start_time))
 plt.plot(np.arange(0, len(result)) / 30, result)
