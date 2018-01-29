@@ -25,7 +25,7 @@ from keras import layers
 
 #video_feature_dir = '/app/data/output/videos/tainan/bridge/bridge_VIRB_V0330045_edit_1_label_85.mp4.npy'
 #video_feature_dir = '/app/data/output/videos/tainan_demo/AIlabs_Demo.mp4.npy'
-video_feature_dir = '/app/data/output/videos/test/test01.mp4.npy'
+video_feature_dir = '/data/thhuang/video-aesthetic-finding-network_output/videos/test/VIRB_V0190019_edit_0_label_218.mp4.npy'
 X = np.load(video_feature_dir)
 X  = np.expand_dims(X, axis=0)
 
@@ -42,12 +42,13 @@ model.add(layers.Bidirectional(layers.GRU(200, activation='tanh', return_sequenc
 model.add(layers.Dropout(0.2))
 model.add(layers.Bidirectional(layers.GRU(200, activation='tanh', return_sequences=True)))
 model.add(layers.Dropout(0.2))
-model.add(layers.Dense(2, activation='softmax'))
+model.add(layers.Dense(100, activation='relu'))
+model.add(layers.Dense(3, activation='softmax'))
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc'])
 model.summary()
 
 # Load model
-model.load_weights('/app/data/output/videos/tainan/weights/weights-improvement=10-0.161847.hdf5')
+model.load_weights('/data/thhuang/video-aesthetic-finding-network_output/videos/tainan/weights/weights-improvement=03-0.157351.hdf5')
 
 
 ################
@@ -57,7 +58,7 @@ model.load_weights('/app/data/output/videos/tainan/weights/weights-improvement=1
 print('Evaluation started!')
 start_time = datetime.now()
 result = model.predict_proba(X)[0][:, 1]
-result_threshold = result > 0.3  # TODO: threshold
+result_threshold = result > 0.08  # TODO: threshold
 end_time = datetime.now()
 print(result)
 if result_threshold[0] == 1:
@@ -78,4 +79,4 @@ if state:
 print('Evaluation complete!')
 print('Time taken: {}'.format(end_time - start_time))
 plt.plot(np.arange(0, len(result)) / 30, result)
-plt.savefig('/app/data/output/videos/result')
+plt.savefig('/data/thhuang/video-aesthetic-finding-network_output/videos/result/result')
