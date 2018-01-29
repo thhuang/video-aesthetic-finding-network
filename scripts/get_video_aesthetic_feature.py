@@ -18,12 +18,12 @@ if __name__ == '__main__':
     parser.add_argument('--embedding_dim', help='Embedding dimension before mapping to one-dimensional score', type=int, default = 1000)
     parser.add_argument('--initial_parameters', help="Path to initial parameter file", type=str, default='/app/vfn/alexnet.npy')
     parser.add_argument('--ranking_loss', help='Type of ranking loss', type=str, choices=['ranknet', 'svm'], default='svm')
-    parser.add_argument('--snapshot', help='Name of the checkpoint files', type=str, default='/app/data/downloads/models/model-spp-max/model-spp-max')
+    parser.add_argument('--snapshot', help='Name of the checkpoint files', type=str, default='/data/thhuang/video-aesthetic-finding-network_download/models/model-spp-max/model-spp-max')
     parser.add_argument('--spp', help='Whether to use spatial pyramid pooling in the last layer or not', type=str, default='True')
     parser.add_argument('--pooling', help='Which pooling function to use', type=str, choices=['max', 'avg'], default='max')
     parser.add_argument('--input', help='Path to the file with images for aesthetics score evaluation', type=str, default='/app/data/input/images')
-    parser.add_argument('--input_videos', help='Path to the file with videos for aesthetics score evaluation', type=str, default='/app/data/input/videos')
-    parser.add_argument('--report_path', help='Path to score report', type=str, default='/app/data/output/videos')
+    parser.add_argument('--input_videos', help='Path to the file with videos for aesthetics score evaluation', type=str, default='/data/thhuang/video-aesthetic-finding-network_input/test')
+    parser.add_argument('--report_path', help='Path to score report', type=str, default='/data/thhuang/video-aesthetic-finding-network_output/videos/test')
 
     args = parser.parse_args()
 

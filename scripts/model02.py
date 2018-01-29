@@ -1,14 +1,19 @@
 import os
-import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 
-from tensorflow.contrib.keras import models
-from tensorflow.contrib.keras import layers
-from tensorflow.contrib.keras import optimizers
-from tensorflow.contrib.keras import callbacks
-from tensorflow.contrib.keras import utils
-from tensorflow.contrib.keras import preprocessing
+import numpy as np
+import matplotlib.pyplot as plt
+
+from keras import models
+from keras import layers
+from keras import optimizers
+from keras import callbacks
+from keras import utils
+from keras import preprocessing
 from sklearn.utils import shuffle
 from datetime import datetime
+from tqdm import tqdm
 
 
 ######################
@@ -56,8 +61,9 @@ for video_name in video_names:
 
 # Input sequence for RNN-based network : [samples, time steps, features]
 # Convert the output patterns into a one-hot encoding
-random_seed = 123
-np.random.seed(random_seed)
+seed = 123
+np.random.seed(seed)
+
 data_bad_input_clips = list()
 data_bad_target_clips = list()
 for video, target in zip(data_bad_input, data_bad_target):
@@ -71,39 +77,52 @@ for video, target in zip(data_bad_input, data_bad_target):
 
 
 # Balance data size
-data_bad_input_clips, data_bad_target_clips = shuffle(data_bad_input_clips, data_bad_target_clips, random_state=random_seed)
+data_bad_input_clips, data_bad_target_clips = shuffle(data_bad_input_clips, data_bad_target_clips, random_state=seed)
 data_input_clips = data_good_input + data_bad_input_clips[:len(data_good_input)]
 data_target_clips = data_good_target + data_bad_target_clips[:len(data_good_target)]
 
 # Padding
-X  = np.concatenate([preprocessing.sequence.pad_sequences(data_input_clips, maxlen=360, padding='post', truncating='post'),
-                     preprocessing.sequence.pad_sequences(data_input_clips, maxlen=360, padding='pre', truncating='pre')], axis=0)
-X  = [np.expand_dims(e, axis=0) for e in X]
-X  = np.concatenate(X, axis=0)
+X_clips  = np.concatenate([preprocessing.sequence.pad_sequences(data_input_clips, maxlen=360, padding='post', truncating='post'),
+                           preprocessing.sequence.pad_sequences(data_input_clips, maxlen=360, padding='pre', truncating='pre')], axis=0)
+X_clips  = [np.expand_dims(e, axis=0) for e in X_clips]
+X_clips  = np.concatenate(X_clips, axis=0)
 
-Y  = np.concatenate([preprocessing.sequence.pad_sequences(data_target_clips, maxlen=360, padding='post', truncating='post'),
-                     preprocessing.sequence.pad_sequences(data_target_clips, maxlen=360, padding='pre', truncating='pre')], axis=0)
-Y = [np.expand_dims(e, axis=0) for e in Y]
-Y = np.concatenate(Y, axis=0)
+Y_clips  = np.concatenate([preprocessing.sequence.pad_sequences(data_target_clips, maxlen=360, padding='post', truncating='post'),
+                           preprocessing.sequence.pad_sequences(data_target_clips, maxlen=360, padding='pre', truncating='pre')], axis=0)
+Y_clips = [np.expand_dims(e, axis=0) for e in Y_clips]
+Y_clips = np.concatenate(Y_clips, axis=0)
 
-# One-hot encoding
+# One-hot encoding (3 categories)
 # 0: padding
 # 1: good
 # 2: bad
-Y = utils.to_categorical(Y, num_classes=3)
+Y_clips = utils.to_categorical(Y_clips, num_classes=3)
 
-X, Y = shuffle(X, Y, random_state=random_seed)
-
-print('X:', X.shape)
-print('Y:', Y.shape)
+X_clips, Y_clips = shuffle(X_clips, Y_clips, random_state=seed)
 good_count = 0
 bad_count = 0
-for i, y in enumerate(Y):
+for i, y in enumerate(Y_clips):
     if y[0, 1] or y[-1, 1] == 1:
         good_count += 1
     if y[0, 2] or y[-1, 2] == 1:
         bad_count += 1
 print('Good:Bad = {}:{}'.format(good_count, bad_count))
+
+print('Creating training data')
+num_choices = 20
+num_combinations = 10000
+X_concat = list()
+Y_concat = list()
+for i in tqdm(range(num_combinations)):
+    choices = np.random.choice(np.arange(0, X_clips.shape[0]), num_choices)
+    X_concat.append(np.expand_dims(np.concatenate(X_clips[choices], axis=0), axis=0))
+    Y_concat.append(np.expand_dims(np.concatenate(Y_clips[choices], axis=0), axis=0))
+
+X = np.concatenate(X_concat, axis=0)
+Y = np.concatenate(Y_concat, axis=0)
+
+print('X:', X.shape)
+print('Y:', Y.shape)
 
 num_samples, num_time_steps, num_features = X.shape
 num_categories = Y.shape[2]
@@ -115,8 +134,8 @@ num_categories = Y.shape[2]
 
 # Define hyper-parameters
 learning_rate = 1e-4
-epochs = 3
-batch_size = 10
+epochs = 200
+batch_size = 100
 
 # Define model
 model = models.Sequential()
@@ -131,12 +150,12 @@ model.summary()
 # Define optimizer
 adam = optimizers.Adam(learning_rate)
 model.compile(optimizer=adam, loss='categorical_crossentropy',
-              metrics=['acc'])
+              metrics=['accuracy'])
 
 # Set check point
 #filepath = '../data/output/videos/tainan/weights/weights-improvement={epoch:02d}-{loss:4f}.hdf5'
-filepath = '/data/thhuang/video-aesthetic-finding-network_output/videos/weights/weights-improvement=03-0.102548.hdf5'
-checkpoint = callbacks.ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
+filepath = '/data/thhuang/video-aesthetic-finding-network_output/videos/weights/weights-improvement={epoch:02d}-{val_loss:4f}.hdf5'
+checkpoint = callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True)
 callbacks_list = [checkpoint]
 
 
@@ -146,11 +165,35 @@ callbacks_list = [checkpoint]
 
 print('Training started:')
 start_time = datetime.now()
-model.fit(X, Y,
-          epochs=epochs, batch_size=batch_size,
-          shuffle=True, callbacks=callbacks_list,
-          verbose=1)
+history = model.fit(X, Y,
+                    epochs=epochs, batch_size=batch_size,
+                    validation_split=0.2, shuffle=True,
+                    callbacks=callbacks_list, verbose=1)
 end_time = datetime.now()
 print('Training complete!')
 print('Time taken: {}'.format(end_time - start_time))
 
+
+###################
+## Summarization ##
+###################
+
+# Summarize the history for accuracy
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.savefig('/data/thhuang/video-aesthetic-finding-network_output/videos/result/accuracy')
+plt.close()
+
+# Summarize the history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.savefig('/data/thhuang/video-aesthetic-finding-network_output/videos/result/loss')
+plt.close()

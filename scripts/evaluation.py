@@ -1,5 +1,5 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import matplotlib
 matplotlib.use('Agg')
@@ -48,7 +48,7 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc']
 model.summary()
 
 # Load model
-model.load_weights('/data/thhuang/video-aesthetic-finding-network_output/videos/tainan/weights/weights-improvement=03-0.157351.hdf5')
+model.load_weights('/data/thhuang/video-aesthetic-finding-network_output/videos/weights/weights-improvement=03-0.102548.hdf5')
 
 
 ################
@@ -58,9 +58,11 @@ model.load_weights('/data/thhuang/video-aesthetic-finding-network_output/videos/
 print('Evaluation started!')
 start_time = datetime.now()
 result = model.predict_proba(X)[0][:, 1]
-result_threshold = result > 0.08  # TODO: threshold
+result_threshold = result > 0.5  # TODO: threshold
 end_time = datetime.now()
 print(result)
+
+# Find clips
 if result_threshold[0] == 1:
     print('clip: {:.2f}'.format(0), end=', ')
     state = True
