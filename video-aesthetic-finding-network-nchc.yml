@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+metadata:
+
+  # pod 的名字，在整個 kubernetes cluster 中必須唯一
+  name: video-aesthetic-finding-network
+
+# spec 描述 pod 的內容
+spec:
+  containers:
+
+    # pod 內的 container 名字。只要在 pod 內唯一就好
+    - name: video-aesthetic-finding-network
+
+      # 執行用到的 docker image
+      image: hc1.corp.ailabs.tw:6000/video-aesthetic-finding-network
+
+      # 每次開始 pod 之前，要下載最新版 image。沒設會直接用現有的
+      imagePullPolicy: Always
+
+
+      # 有用到 GPU 的才需要這三行。可以指定需要的 GPU 個數。
+      # Pod 會等到有指定的 GPU 可用後才會開始，開始後 Pod 會把這些 GPU 抓住，其它人不能同時用。s
+      # 目前 nchc 環境 總共 8 顆 GPU，ailabs 環境 3 顆。
+      resources:
+        limits:
+          alpha.kubernetes.io/nvidia-gpu: 1
+
+
+
+      # 把最下面設定的 "data-volume" 掛進 docker container 裡的 /data 路徑
+      volumeMounts:
+        - name: data-volume
+          mountPath: /data
+
+
+        # 下面這一團東西，有用到 GPU 的才需要，要配合最下面 volumes 的設定
+        - name: nvidia-bin
+          mountPath: /usr/local/nvidia/bin
+        - name: nvidia-lib
+          mountPath: /usr/local/nvidia/lib
+        - name: libcuda-so
+          mountPath: /usr/lib/x86_64-linux-gnu/libcuda.so
+        - name: libcuda-so-1
+          mountPath: /usr/lib/x86_64-linux-gnu/libcuda.so.1
+
+
+  # 連上系統設定好的 "data" volume，並取名為 "data-volume"
+  volumes:
+    - name: data-volume
+      persistentVolumeClaim:
+        claimName: data
+
+
+    # 下面這一團東西，有用到 GPU 的才需要
+    - name: nvidia-bin
+      hostPath:
+        path: /usr/lib/nvidia-384/bin
+    - name: nvidia-lib
+      hostPath:
+        path: /usr/lib/nvidia-384
+    - name: libcuda-so
+      hostPath:
+        path: /usr/lib/x86_64-linux-gnu/libcuda.so
+    - name: libcuda-so-1
+      hostPath:
+        path: /usr/lib/x86_64-linux-gnu/libcuda.so.1

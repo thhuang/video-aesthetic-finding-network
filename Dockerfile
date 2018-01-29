@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
         python3-pip \
         python3-setuptools \
         python3-tk \
+        screen \
         tree \
         unzip \
         vim \
@@ -67,6 +68,6 @@ WORKDIR /app
 COPY . /app/
 
 # Define default command.
-CMD ["bash"]
+#CMD ["bash"]
 
 EXPOSE 12345

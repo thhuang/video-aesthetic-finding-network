@@ -14,7 +14,8 @@ from datetime import datetime
 ## Data Preparation ##
 ######################
 
-videos_features_dir = '/app/data/output/videos/tainan/boat'
+#videos_features_dir = '/app/data/output/videos/tainan/boat'
+videos_features_dir = '/data/thhuang/video-aesthetic-finding-network_output/videos/tainan/boat'
 video_names = os.listdir(videos_features_dir)
 num_videos = len(video_names)
 
@@ -30,7 +31,8 @@ for video_name in video_names:
 
 ######################################
 
-videos_features_dir = '/app/data/output/videos/tainan/bridge'
+#videos_features_dir = '/app/data/output/videos/tainan/bridge'
+videos_features_dir = '/data/thhuang/video-aesthetic-finding-network_output/videos/tainan/bridge'
 video_names = os.listdir(videos_features_dir)
 num_videos = len(video_names)
 
