@@ -109,12 +109,18 @@ for i, y in enumerate(Y_clips):
 print('Good:Bad = {}:{}'.format(good_count, bad_count))
 
 print('Creating training data')
-num_choices = 20
-num_combinations = 10000
+num_choices = 10
+num_combinations = 1000
 X_concat = list()
 Y_concat = list()
 for i in tqdm(range(num_combinations)):
     choices = np.random.choice(np.arange(0, X_clips.shape[0]), num_choices)
+    #if i == 0:
+    #    X = np.expand_dims(np.concatenate(X_clips[choices], axis=0), axis=0)
+    #    Y = np.expand_dims(np.concatenate(Y_clips[choices], axis=0), axis=0)
+    #else:
+    #    X = np.concatenate([X, np.expand_dims(np.concatenate(X_clips[choices], axis=0), axis=0)], axis=0)
+    #    Y = np.concatenate([Y, np.expand_dims(np.concatenate(Y_clips[choices], axis=0), axis=0)], axis=0)
     X_concat.append(np.expand_dims(np.concatenate(X_clips[choices], axis=0), axis=0))
     Y_concat.append(np.expand_dims(np.concatenate(Y_clips[choices], axis=0), axis=0))
 
