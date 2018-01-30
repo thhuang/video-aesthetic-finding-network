@@ -1,6 +1,9 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+import sys
+sys.path.insert(0, '/app')
+
 import matplotlib
 matplotlib.use('Agg')
 
@@ -8,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from datetime import datetime
+from utils.time_counters import sec2time
 
 #from tensorflow.contrib.keras import models
 #from tensorflow.contrib.keras import layers
@@ -48,37 +52,59 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc']
 model.summary()
 
 # Load model
-model.load_weights('/data/thhuang/video-aesthetic-finding-network_output/videos/weights/weights-improvement=03-0.102548.hdf5')
+model.load_weights('/data/thhuang/video-aesthetic-finding-network_output/videos/weights/weights-improvement=106-0.019243.hdf5')
 
 
 ################
 ## Evaluation ##
 ################
 
-print('Evaluation started!')
+print('\nEvaluating...')
 start_time = datetime.now()
-result = model.predict_proba(X)[0][:, 1]
-result_threshold = result > 0.5  # TODO: threshold
+result = model.predict_proba(X)[0]
 end_time = datetime.now()
-print(result)
+result_0 = result[:, 0]
+result_1 = result[:, 1]
+result_2 = result[:, 2]
+
+result_argmax = np.argmax(result, axis=1)
+print(result_argmax)
 
 # Find clips
-if result_threshold[0] == 1:
-    print('clip: {:.2f}'.format(0), end=', ')
+video_clips = list()
+if result_argmax[0] == 1:
+    clip = [0]
     state = True
 else:
     state = False
 for i in range(len(result) - 1):
-    if not result_threshold[i] == result_threshold[i + 1]:
-        if not state:
-            print('clip: {:.2f}'.format(i / 30), end=', ')
-            state = True
-        else:
-            print('{:.2f}'.format(i / 30))
+    if not result_argmax[i] == result_argmax[i + 1]:
+        if state:
+            clip.append(i / 30)
+            video_clips.append(clip)
             state = False
+        else:
+            clip = [i / 30]
+            state = True
 if state:
-    print('end')
+    clip.append(i / 30)
+    video_clips.append(clip)
+
+# Find clips not too short
+final_clips = list()
+for c in video_clips:
+    if c[1] - c[0] >= 4:  # TODO: threshold
+        final_clips.append(c)
+        print('clip', sec2time(c[0]), sec2time(c[1]))
+
+# Plot result
 print('Evaluation complete!')
 print('Time taken: {}'.format(end_time - start_time))
-plt.plot(np.arange(0, len(result)) / 30, result)
+t = np.arange(0, len(result)) / 30
+plt.plot(t, result_0, t, result_1, t, result_2)
+plt.legend(['padding', 'good', 'bad'])
 plt.savefig('/data/thhuang/video-aesthetic-finding-network_output/videos/result/result')
+plt.close()
+plt.plot(t, result_argmax == 1)
+plt.savefig('/data/thhuang/video-aesthetic-finding-network_output/videos/result/result_clips')
+plt.close()
